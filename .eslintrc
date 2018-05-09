@@ -1,0 +1,30 @@
+{
+  "extends": [
+  "airbnb-base",
+  # "prettier"
+  ],
+  # "plugins": ["prettier"],
+  "plugins": [],
+  "env": {
+    "node": true
+  },
+  "parser": "babel-eslint",
+  "rules": {
+    "padding-line-between-statements": ["error",
+    { blankLine: "always", prev: "*", next: "return" },
+    ],
+    "padded-blocks": 2,
+    "func-names": 0,
+    "no-param-reassign": ["error", {"ignorePropertyModificationsFor": ["server"]}],
+    "no-console": ["error", { "allow": ["warn", "error"] }],
+    "no-shadow": ["error", { "allow": ["err", "res", "value", "error"] }],
+    "consistent-return": 0,
+    "prefer-destructuring": ["error", {
+      "array": false,
+      "object": true
+    }],
+    "no-multi-spaces": ["error", {"ignoreEOLComments": true, "exceptions": { "VariableDeclarator": true }}],
+    "strict": 0,
+    "import/no-dynamic-require": 0
+  }
+}
