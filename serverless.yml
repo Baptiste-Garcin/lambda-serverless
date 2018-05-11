@@ -61,19 +61,27 @@ provider:
 #    - exclude-me-dir/**
 
 functions:
-  hello:
-    handler: handler.hello
+  getUser:
+    handler: user.getUser
 
 #    The following are a few example events you can configure
 #    NOTE: Please make sure to change your handler code to work with those events
 #    Check the event documentation for details
     events:
       - http:
-          path: movie
+          path: user/{id}
           method: GET
       - http:
-          path: movie
+          path: user
+          method: GET
+
+  postUser:
+    handler: user.postUser
+    events:
+      - http:
+          path: user
           method: POST
+
 #      - s3: ${env:BUCKET}
 #      - schedule: rate(10 minutes)
 #      - sns: greeter-topic
@@ -103,25 +111,16 @@ functions:
 # you can add CloudFormation resource templates here
 resources:
   Resources:
-    bucketTest:
-      Type: AWS::S3::Bucket
-      Properties:
-        BucketName: ${self:service}-${self:provider.stage}-bucket-test
-
-    movieTable:
+    usersTable:
       Type: AWS::DynamoDB::Table
       Properties:
-        TableName: movies
+        TableName: users
         AttributeDefinitions:
-          - AttributeName: year
-            AttributeType: N
-          - AttributeName: title
+          - AttributeName: id
             AttributeType: S
         KeySchema:
-          - AttributeName: year
+          - AttributeName: id
             KeyType: HASH
-          - AttributeName: title
-            KeyType: RANGE
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1

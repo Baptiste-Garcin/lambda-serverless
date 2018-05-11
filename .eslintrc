@@ -1,14 +1,12 @@
 {
   "extends": [
-  "airbnb-base",
-  # "prettier"
+  "airbnb-base"
   ],
-  # "plugins": ["prettier"],
   "plugins": [],
   "env": {
     "node": true
   },
-  "parser": "babel-eslint",
+
   "rules": {
     "padding-line-between-statements": ["error",
     { blankLine: "always", prev: "*", next: "return" },
