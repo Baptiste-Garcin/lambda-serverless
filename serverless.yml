@@ -24,6 +24,8 @@ provider:
 # you can overwrite defaults here
   stage: dev
   region: eu-west-3
+  environment:
+    tokenSecret: ${file(config.${self:provider.stage}.json):tokenSecret}
 
 # you can add statements to the Lambda function's IAM Role here
   iamRoleStatements:
@@ -35,7 +37,16 @@ provider:
         - dynamodb:PutItem
         - dynamodb:UpdateItem
         - dynamodb:DeleteItem
-      Resource: arn:aws:dynamodb:eu-west-3:994901377872:table/movies
+      Resource: arn:aws:dynamodb:eu-west-3:994901377872:table/users
+    - Effect: "Allow"
+      Action:
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+      Resource: arn:aws:dynamodb:eu-west-3:994901377872:table/users/index/email-index
 
 #    - Effect: "Allow"
 #      Action:
@@ -61,26 +72,40 @@ provider:
 #    - exclude-me-dir/**
 
 functions:
-  getUser:
-    handler: user.getUser
+  signIn:
+    handler: user.signIn
 
 #    The following are a few example events you can configure
 #    NOTE: Please make sure to change your handler code to work with those events
 #    Check the event documentation for details
     events:
       - http:
-          path: user/{id}
-          method: GET
-      - http:
-          path: user
-          method: GET
+          path: user/login
+          method: POST
 
-  postUser:
-    handler: user.postUser
+  authorize:
+    handler: authorize.handler
+
+  signUp:
+    handler: user.signUp
     events:
       - http:
-          path: user
+          path: user/register
           method: POST
+
+  getUser:
+    handler: user.getUser
+    events:
+      - http:
+          path: user/{id}
+          method: GET
+          authorizer: authorize
+          cors: true
+      - http:
+          path: user
+          method: GET
+          authorizer: authorize
+          cors: true
 
 #      - s3: ${env:BUCKET}
 #      - schedule: rate(10 minutes)
@@ -118,9 +143,21 @@ resources:
         AttributeDefinitions:
           - AttributeName: id
             AttributeType: S
+          - AttributeName: email
+            AttributeType: S
         KeySchema:
           - AttributeName: id
             KeyType: HASH
+        GlobalSecondaryIndexes:
+          - IndexName: email-index
+            KeySchema:
+              - AttributeName: email
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL
+            ProvisionedThroughput:
+              ReadCapacityUnits: 1
+              WriteCapacityUnits: 1
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
